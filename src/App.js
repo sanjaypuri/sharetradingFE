@@ -1,23 +1,10 @@
-import logo from './logo.svg';
-import './App.css';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className="w3-container">
+      <div className="w3-panel w3-pale-blue w3-monospace" style={{fontSize:'30px'}}>
+        Share Trading App comming up soon....
+      </div>
     </div>
   );
 }
