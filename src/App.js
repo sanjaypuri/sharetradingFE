@@ -1,11 +1,24 @@
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Navbar from './components/Navbar';
+import Home from './pages/Home';
+import Signup from './pages/Signup';
+import Login from './pages/Login';
 
 function App() {
   return (
-    <div className="w3-container">
-      <div className="w3-panel w3-pale-blue w3-monospace" style={{fontSize:'30px'}}>
-        Share Trading App comming up soon....
-      </div>
-    </div>
+    <>
+      <BrowserRouter>
+        <ToastContainer></ToastContainer>
+        <Navbar />
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route path="/signup" element={<Signup />} />
+          <Route path="/login" element={<Login />} />
+        </Routes>
+      </BrowserRouter>
+    </>
   );
 }
 
