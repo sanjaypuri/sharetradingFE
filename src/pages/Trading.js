@@ -1,55 +1,34 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-// import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
 
 export default function Trading() {
 
-  const [companies, setCompanies] = useState([]);
-  const [companyP, setCompanyP] = useState(0);
-  const [companyS, setCompanyS] = useState(0);
   const [purDate, setPurDate] = useState(null);
   const [purRate, setPurRate] = useState(0);
   const [purQty, setPurQty] = useState(0);
   const [saleDate, setSaleDate] = useState(null);
   const [saleRate, setSaleRate] = useState(0);
   const [saleQty, setSaleQty] = useState(0);
-  // const navigate = useNavigate();
+  const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState(null);
   const [options, setOptions] = useState([]);
-  // let options = [
-  //   { value: 'chocolate', label: 'Chocolate' },
-  //   { value: 'strawberry', label: 'Strawberry' },
-  //   { value: 'vanilla', label: 'Vanilla' },
-  // ];
+
   useEffect(() => {
-    console.log(options);
-    axios.get("http://localhost:5000/api/companies")
+    axios.get("http://localhost:5000/api/forselect")
       .then(res => {
         if(!res.data.success){
           toast.error(res.data.error);
         } else {
-          setCompanies(res.data.data);
-          loadCompanies(companies)
+          setOptions(res.data.data);
         }
-        
-        
       })
       .catch(err => {
         toast.error("Error gettings Companies from server");
       });
   }, []);
-
-  const loadCompanies = (companies_) => {
-        console.log(companies_)
-        let newOptions = companies_.map(company => ({
-          value: company.id,
-          age: company.company
-        }));
-        
-        setOptions(newOptions)
-  }
 
   const openTab = (tabId) => {
     var i;
@@ -65,31 +44,42 @@ export default function Trading() {
     if (!validPurchase()) {
       return;
     }
-    toast.info("Form data saved");
-    // axios.post("http://localhost:5000/api/login", { username, password })
-    //   .then(res => {
-    //     console.log(res.data);
-    //     if (res.data.success) {
-    //       sessionStorage.setItem("spbysptoken", res.data.data.token);
-    //       sessionStorage.setItem("spbyspuser", res.data.data.user);
-    //       toast.success(res.data.message);
-    //       navigate('/');
-    //     } else {
-    //       toast.error(res.data.error);
-    //     };
-    //   })
-    //   .catch(err => {
-    //     console.log(err);
-    //     toast.error("Error creating user");
-    //   })
+    console.log(sessionStorage.getItem("spbysptoken"))
+    axios.post("http://localhost:5000/api/buy", { 
+      shareid:selectedOption.value, 
+      buydate: purDate, 
+      buyrate: purRate, 
+      buyqty: purQty 
+    },
+    {
+      headers:{
+        token:sessionStorage.getItem("spbysptoken")
+
+      }
+    } 
+    )
+      .then(res => {
+        alert("No Error");
+        if (res.data.success) {
+          console.log(res.data);
+          toast.success(res.data.message);
+          navigate('/');
+        } else {
+          console.log(res.data);
+          toast.error(res.data.error);
+        };
+      })
+      .catch(err => {
+        alert("error");
+        toast.error(err);
+      })
   };
 
   const validPurchase = () => {
-    alert(options[0].value)
-    if(companyP === 0){
+    if(selectedOption === null){
       toast.error("Please select a company");
       return false;
-    };
+    } else {console.log(selectedOption.value)}
     if(purDate === null){
       toast.error("Please enter a date of Purchase");
       return false;
@@ -111,10 +101,6 @@ export default function Trading() {
       return false;
     };
     return true;
-  };
-
-  const handleChangeP = (companyID) => {
-    setCompanyP(companyID);
   };
 
   const handleSale = (event) => {
@@ -142,7 +128,7 @@ export default function Trading() {
   };
 
   const validSale = () => {
-    if(companyS === 0){
+    if(selectedOption === null){
       toast.error("Please select a company");
       return false;
     };
@@ -169,10 +155,6 @@ export default function Trading() {
     return true;
   };
 
-  const handleChangeS = (companyID) => {
-    setCompanyS(companyID);
-  };
-
   return (
     <div className="w3-container w3-margin w3-row" style={{ paddingTop: '2%' }}>
       <div className="w3-third">&nbsp;</div>
@@ -185,35 +167,24 @@ export default function Trading() {
           <h2>Purchase Details</h2>
           <form className="w3-container w3-pale-blue" onSubmit={handlePurchase}>
             <div>
+              <label className="w3-text-indigo"><b>Select Share<span className="w3-text-red"> *</span></b></label>
               <Select
                 defaultValue={selectedOption}
                 onChange={setSelectedOption}
-                options={options}
-              />
-              
-              <label className="w3-text-indigo"><b>Select Share<span className="w3-text-red"> *</span></b></label>
-              <select className="w3-select w3-border w3-light-grey" name="option" onChange={e =>{handleChangeP(e.target.value)}}>
-                <option value="" disabled selected>Choose your option</option>
-                {
-                  companies.map(function fn(company) {
-                    return (
-                      <option value={company.id}>{company.company}</option>
-                    );
-                  })
-                }
-              </select>
+                options={options}>
+              </Select>
             </div>
             <div className="w3-margin-top">
               <label className="w3-text-indigo w3-margin-top"><b>Purchase Date<span className="w3-text-red"> *</span></b></label>
-              <input className="w3-input w3-border w3-light-grey" type="date" onChange={e => setPurDate(e.target.value)} />
+              <input className="w3-input w3-border" type="date" onChange={e => setPurDate(e.target.value)} />
             </div>
             <div className="w3-margin-top">
               <label className="w3-text-indigo w3-margin-top"><b>Purchase Rate<span className="w3-text-red"> *</span></b></label>
-              <input className="w3-input w3-border w3-light-grey" type="text" onChange={e => setPurRate(e.target.value)} />
+              <input className="w3-input w3-border" type="text" onChange={e => setPurRate(e.target.value)} />
             </div>
             <div className="w3-margin-top">
               <label className="w3-text-indigo w3-margin-top"><b>Purchase Qty<span className="w3-text-red"> *</span></b></label>
-              <input className="w3-input w3-border w3-light-grey" type="text" onChange={e => setPurQty(e.target.value)} />
+              <input className="w3-input w3-border" type="text" onChange={e => setPurQty(e.target.value)} />
             </div>
             <button type="submit" className="w3-btn w3-blue w3-margin-top w3-margin-bottom" style={{ width: '100%' }}>Save</button>
           </form>
@@ -223,28 +194,22 @@ export default function Trading() {
           <form className="w3-container w3-pale-blue" onSubmit={handleSale}>
             <div>
               <label className="w3-text-indigo"><b>Select Share<span className="w3-text-red"> *</span></b></label>
-              <select className="w3-select w3-border w3-light-grey" name="option" onChange={e =>{handleChangeS(e.target.value)}}>
-                <option value="" disabled selected>Choose your option</option>
-                {
-                  companies.map(function fn(company) {
-                    return (
-                      <option value={company.id}>{company.company}</option>
-                    );
-                  })
-                }
-              </select>
+              <Select
+                defaultValue={selectedOption}
+                onChange={setSelectedOption}
+                options={options}/>
             </div>
             <div className="w3-margin-top">
               <label className="w3-text-indigo w3-margin-top"><b>Sale Date<span className="w3-text-red"> *</span></b></label>
-              <input className="w3-input w3-border w3-light-grey" type="date" onChange={e => setSaleDate(e.target.value)} />
+              <input className="w3-input w3-border" type="date" onChange={e => setSaleDate(e.target.value)} />
             </div>
             <div className="w3-margin-top">
               <label className="w3-text-indigo w3-margin-top"><b>Sale Rate<span className="w3-text-red"> *</span></b></label>
-              <input className="w3-input w3-border w3-light-grey" type="text" onChange={e => setSaleRate(e.target.value)} />
+              <input className="w3-input w3-border" type="text" onChange={e => setSaleRate(e.target.value)} />
             </div>
             <div className="w3-margin-top">
               <label className="w3-text-indigo w3-margin-top"><b>Sale Qty<span className="w3-text-red"> *</span></b></label>
-              <input className="w3-input w3-border w3-light-grey" type="text" onChange={e => setSaleQty(e.target.value)} />
+              <input className="w3-input w3-border" type="text" onChange={e => setSaleQty(e.target.value)} />
             </div>
             <button type="submit" className="w3-btn w3-blue w3-margin-top w3-margin-bottom" style={{ width: '100%' }}>Save</button>
           </form>

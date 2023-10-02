@@ -77,7 +77,7 @@ export default function Signup() {
   };
 
   return (
-    <div class="w3-container w3-row w3-margin-top">
+    <div className="w3-container w3-row w3-margin-top">
       <div className="w3-third">&nbsp;</div>
       <div className="w3-third w3-card-4 w3-margin-top">
         <div className="w3-container w3-blue w3-cursive">
