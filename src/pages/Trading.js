@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+// import { useNavigate } from 'react-router-dom';
+import Select from 'react-select';
 
 export default function Trading() {
 
@@ -14,21 +15,41 @@ export default function Trading() {
   const [saleDate, setSaleDate] = useState(null);
   const [saleRate, setSaleRate] = useState(0);
   const [saleQty, setSaleQty] = useState(0);
-  const navigate = useNavigate();
-
+  // const navigate = useNavigate();
+  const [selectedOption, setSelectedOption] = useState(null);
+  const [options, setOptions] = useState([]);
+  // let options = [
+  //   { value: 'chocolate', label: 'Chocolate' },
+  //   { value: 'strawberry', label: 'Strawberry' },
+  //   { value: 'vanilla', label: 'Vanilla' },
+  // ];
   useEffect(() => {
+    console.log(options);
     axios.get("http://localhost:5000/api/companies")
       .then(res => {
         if(!res.data.success){
           toast.error(res.data.error);
         } else {
           setCompanies(res.data.data);
+          loadCompanies(companies)
         }
+        
+        
       })
       .catch(err => {
         toast.error("Error gettings Companies from server");
       });
   }, []);
+
+  const loadCompanies = (companies_) => {
+        console.log(companies_)
+        let newOptions = companies_.map(company => ({
+          value: company.id,
+          age: company.company
+        }));
+        
+        setOptions(newOptions)
+  }
 
   const openTab = (tabId) => {
     var i;
@@ -64,6 +85,7 @@ export default function Trading() {
   };
 
   const validPurchase = () => {
+    alert(options[0].value)
     if(companyP === 0){
       toast.error("Please select a company");
       return false;
@@ -163,6 +185,12 @@ export default function Trading() {
           <h2>Purchase Details</h2>
           <form className="w3-container w3-pale-blue" onSubmit={handlePurchase}>
             <div>
+              <Select
+                defaultValue={selectedOption}
+                onChange={setSelectedOption}
+                options={options}
+              />
+              
               <label className="w3-text-indigo"><b>Select Share<span className="w3-text-red"> *</span></b></label>
               <select className="w3-select w3-border w3-light-grey" name="option" onChange={e =>{handleChangeP(e.target.value)}}>
                 <option value="" disabled selected>Choose your option</option>

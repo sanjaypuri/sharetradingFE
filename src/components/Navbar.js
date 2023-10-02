@@ -7,7 +7,6 @@ export default function Navbar() {
   // const navigate = useNavigate();
   const token = sessionStorage.getItem("spbysptoken")
   const user = sessionStorage.getItem("spbyspuser")
-  console.log(token);
   const handleLogout = () => {
     sessionStorage.removeItem("ftbyspToken");
     // navigate('/home');
@@ -20,7 +19,7 @@ export default function Navbar() {
         <>
           <Link to="/" className="w3-bar-item w3-button w3-hover-blue">Home</Link>
           <Link to="/trading" className="w3-bar-item w3-button w3-hover-blue">Trading Details</Link>
-          <a href="#" className="w3-bar-item w3-button w3-right w3-hover-blue" onClick={handleLogout}>Log out</a>
+          <span className="w3-bar-item w3-button w3-right w3-hover-blue" onClick={handleLogout}>Log out</span>
           <span className="w3-bar-item w3-right w3-text-indigo">Welcome<b> {user}</b></span>
         </>
       ) : (
