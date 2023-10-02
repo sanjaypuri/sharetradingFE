@@ -83,19 +83,20 @@ export default function Signup() {
         <div className="w3-container w3-blue w3-cursive">
           <h2>Register new User</h2>
         </div>
-
         <form className="w3-container w3-padding-top w3-pale-blue" onSubmit={handleSubmit}>
-          <br/>
-          <label className="w3-text-teal"><b>User Name</b></label>
-          <input className="w3-input w3-border w3-light-grey" type="text" onChange={e => setUsername(e.target.value)}/>
-          <br/>
-          <label className="w3-text-teal w3-margin-top"><b>Password</b></label>
-          <input className="w3-input w3-border w3-light-grey" type="password" onChange={e => setPassword(e.target.value)}/>
-          <br/>
-          <label className="w3-text-teal w3-margin-top"><b>Confirm Password</b></label>
-          <input className="w3-input w3-border w3-light-grey" type="password" onChange={e => setCpassword(e.target.value)}/>
-          <br/>
-          <button type="submit" className="w3-btn w3-blue w3-margin-bottom" style={{width:'100%'}}>Register</button>
+          <div className="w3-margin-top">
+            <label className="w3-text-indigo"><b>User Name<span className="w3-text-red"> *</span></b></label>
+            <input className="w3-input w3-border w3-light-grey" type="text" onChange={e => setUsername(e.target.value)}/>
+          </div>
+          <div className="w3-margin-top">
+            <label className="w3-text-indigo w3-margin-top"><b>Password<span className="w3-text-red"> *</span></b></label>
+            <input className="w3-input w3-border w3-light-grey" type="password" onChange={e => setPassword(e.target.value)}/>
+          </div>
+          <div className="w3-margin-top">
+            <label className="w3-text-indigo w3-margin-top"><b>Confirm Password<span className="w3-text-red"> *</span></b></label>
+            <input className="w3-input w3-border w3-light-grey" type="password" onChange={e => setCpassword(e.target.value)}/>
+          </div>
+          <button type="submit" className="w3-btn w3-blue w3-margin-top w3-margin-bottom" style={{width:'100%'}}>Register</button>
         </form>
       </div>
       <div className="w3-third">&nbsp;</div>
