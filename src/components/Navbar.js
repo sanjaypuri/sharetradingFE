@@ -31,8 +31,8 @@ export default function Navbar() {
           <div className="w3-dropdown-hover">
             <button className="w3-button w3-hover-blue">Trading Reports</button>
             <div className="w3-dropdown-content w3-bar-block w3-card-4">
-              <Link to="/buy" className="w3-bar-item w3-button w3-hover-blue">All Purchases</Link>
-              <Link to="/sell" className="w3-bar-item w3-button w3-hover-blue">All Sales</Link>
+              <Link to="/allbuy" className="w3-bar-item w3-button w3-hover-blue">All Purchases</Link>
+              <Link to="/allsale" className="w3-bar-item w3-button w3-hover-blue">All Sales</Link>
             </div>
           </div>
           <Link to="/" className="w3-bar-item w3-button w3-hover-blue">About</Link>

@@ -7,6 +7,8 @@ import Signup from './pages/Signup';
 import Login from './pages/Login';
 import Buy from './pages/Buy';
 import Sell from './pages/Sell';
+import ReportAllBuy from './pages/ReportAllBuy';
+import ReportAllSold from './pages/ReportallSold';
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/buy" element={<Buy/>} />
           <Route path="/sell" element={<Sell/>} />
+          <Route path="/allbuy" element={<ReportAllBuy/>} />
+          <Route path="/allsale" element={<ReportAllSold/>} />
         </Routes>
       </BrowserRouter>
     </>
