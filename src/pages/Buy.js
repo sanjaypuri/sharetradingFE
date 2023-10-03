@@ -3,9 +3,11 @@ import { toast } from 'react-toastify';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import Select from 'react-select';
+import moment from 'moment';
 
 export default function Buy() {
 
+  const token = sessionStorage.getItem("spbysptoken")
   const navigate = useNavigate();
 
   const [purDate, setPurDate] = useState(null);
@@ -41,7 +43,7 @@ export default function Buy() {
     },
     {
       headers:{
-        token:sessionStorage.getItem("spbysptoken")
+        token:token
       }
     } 
     )
@@ -59,12 +61,17 @@ export default function Buy() {
   };
 
   const validPurchase = () => {
+    const today = moment();
     if(selectedOption === null){
       toast.error("Please select a company");
       return false;
     }
     if(purDate === null){
       toast.error("Please enter a date of Purchase");
+      return false;
+    };
+    if(purDate > today.format("YYYY-MM-DD")){
+      toast.error("Purchase date should be of after today")
       return false;
     };
     if (purRate === '' || purRate === null) {
