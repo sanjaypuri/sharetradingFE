@@ -12,6 +12,7 @@ export default function Navbar() {
     sessionStorage.removeItem("spbysptoken");
     sessionStorage.removeItem("spbyspuser");
     navigate('/');
+    window.location.reload();
   };
 
   return (
@@ -20,7 +21,21 @@ export default function Navbar() {
       {token ? (
         <>
           <Link to="/" className="w3-bar-item w3-button w3-hover-blue">Home</Link>
-          <Link to="/trading" className="w3-bar-item w3-button w3-hover-blue">Trading Details</Link>
+          <div className="w3-dropdown-hover">
+            <button className="w3-button w3-hover-blue">Trading Details</button>
+            <div className="w3-dropdown-content w3-bar-block w3-card-4">
+              <Link to="/buy" className="w3-bar-item w3-button w3-hover-blue">Buy</Link>
+              <Link to="/sell" className="w3-bar-item w3-button w3-hover-blue">Sell</Link>
+            </div>
+          </div>
+          <div className="w3-dropdown-hover">
+            <button className="w3-button w3-hover-blue">Trading Reports</button>
+            <div className="w3-dropdown-content w3-bar-block w3-card-4">
+              <Link to="/buy" className="w3-bar-item w3-button w3-hover-blue">Buying Details</Link>
+              <Link to="/sell" className="w3-bar-item w3-button w3-hover-blue">Selling Details</Link>
+            </div>
+          </div>
+          <Link to="/" className="w3-bar-item w3-button w3-hover-blue">About</Link>
           <span className="w3-bar-item w3-button w3-right w3-hover-blue" onClick={handleLogout}>Log out</span>
           <span className="w3-bar-item w3-right w3-text-indigo">Welcome<b> {user}</b></span>
         </>

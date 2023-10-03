@@ -5,7 +5,8 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import Signup from './pages/Signup';
 import Login from './pages/Login';
-import Trading from './pages/Trading';
+import Buy from './pages/Buy';
+import Sell from './pages/Sell';
 
 function App() {
   return (
@@ -17,7 +18,8 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/trading" element={<Trading/>} />
+          <Route path="/buy" element={<Buy/>} />
+          <Route path="/sell" element={<Sell/>} />
         </Routes>
       </BrowserRouter>
     </>

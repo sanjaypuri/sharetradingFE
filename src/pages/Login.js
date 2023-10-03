@@ -17,18 +17,20 @@ export default function Login() {
     }
     axios.post("http://localhost:5000/api/login", {username, password})
       .then(res => {
+        console.log(res.data.success);
         if(res.data.success){
           sessionStorage.setItem("spbysptoken", res.data.data.token);
           sessionStorage.setItem("spbyspuser", res.data.data.user);
           toast.success(res.data.message);
           navigate('/');
         } else {
+          console.log(res.data.error);
           toast.error(res.data.error);
         };
       })
       .catch (err => {
         console.log(err);
-        toast.error("Error creating user");
+        toast.error("Server Error");
       })
   };
 
