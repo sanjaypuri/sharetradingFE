@@ -22,7 +22,11 @@ export default function ReportAllSold() {
         };
       })
       .catch(err => {
-        toast.error("Server Error");
+        if(err.message === "Request aborted"){
+          ;
+        } else{
+          toast.error("Server Error");
+        };
       });
   });
 
@@ -41,14 +45,14 @@ export default function ReportAllSold() {
   }
 
   const getTotal = () => {
-    const totalCost = records.reduce((total, record) => total + record.soldvalue, 0);
+    const totalCost = records.reduce((total, record) => total + -1*parseFloat(record.amount), 0);
       return totalCost;
   };
 
   return (
     <div>
       <div className="w3-center w3-margin-bottom w3-margin-top" style={{ fontSize: '2.5rem' }}>
-        List of all Sold Shares
+        Sold Shares History
       </div>
       <table className="w3-table w3-bordered" style={{ width: '50%', marginLeft: 'auto', marginRight: 'auto' }}>
         <tr>
@@ -61,10 +65,10 @@ export default function ReportAllSold() {
         {records.map((record) => (
           <tr className="w3-hover-pale-blue">
             <td>{record.company}</td>
-            <td>{toDateString(record.date)}</td>
-            <td style={{ textAlign: 'right' }}>{record.qty}</td>
-            <td style={{ textAlign: 'right' }}>{record.rate.toFixed(2)}</td>
-            <td style={{ textAlign: 'right' }}>{record.soldvalue.toFixed(2)}</td>
+            <td>{toDateString(record.tdate)}</td>
+            <td style={{ textAlign: 'right' }}>{-1*(record.qty)}</td>
+            <td style={{ textAlign: 'right' }}>{parseFloat(record.rate).toFixed(2)}</td>
+            <td style={{ textAlign: 'right' }}>{-1*(parseFloat(record.amount).toFixed(2))}</td>
           </tr>
         ))}
         <tr>

@@ -7,61 +7,110 @@ export default function Home() {
   const token = sessionStorage.getItem("spbysptoken")
   const user = sessionStorage.getItem("spbyspuser")
 
-  const [records, setRecords] = useState([]);
+  const [portfolio, setPortfolio] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+
 
   useEffect(() => {
-    if(!token) return;
+    if (!token) return;
     axios.get("http://localhost:5000/api/portfolio", {
       headers: {
         'token': token
       }
-    })
+    }, [])
       .then(res => {
         if (!res.data.success) {
           toast.error(res.data.error);
         } else {
-          setRecords(res.data.data);
+          setPortfolio(res.data.portfolio);
+          setTransactions(res.data.transactions);
         };
       })
       .catch(err => {
-        toast.error("Server Error");
+        if (err.message === "Request aborted") {
+          ;
+        } else {
+          toast.error("Server Error...");
+        };
       });
   });
 
   const getTotal = () => {
-    const totalCost = records.reduce((total, record) => total + record.cost, 0);
-      return totalCost;
+    const totalCost = portfolio.reduce((total, record) => total + parseFloat(record.avgcost), 0);
+    return totalCost;
+  };
+
+  const getPurchase = (total, record) => {
+    if(record.qty >= 0){
+      return total + parseFloat(record.amount);
+    } else {
+      return total;
+    }
+  };
+
+  const getSale = (total, record) => {
+    if(record.qty < 0){
+      return total + -1*parseFloat(record.amount);
+    } else {
+      return total;
+    }
+  };
+
+  const getRealGain = (total, record) => {
+    if(record.qty < 0){
+      return total + -1*(parseFloat(record.rate)-parseFloat(record.purchaserate))*parseFloat(record.qty);
+    } else {
+      return total;
+    }
   };
 
   return (
     <div>
       {token ? (
         <>
-          <div className="w3-center w3-margin-bottom w3-margin-top" style={{ fontSize: '2.5rem' }}>Shares Portfolio for {user}</div>
+          <div className=" w3-margin-top" style={{
+            display: 'flex',
+            justifyContent: 'space-around'
+          }}>
+            <div className="w3-card w3-blue w3-center w3-round-large" style={{width:'20%'}}>
+              <p>Total Purchased: {transactions.reduce(getPurchase, 0).toFixed(2)}</p>
+            </div>
+            <div className="w3-card w3-blue w3-center w3-round-large" style={{width:'20%'}}>
+              <p>Total Sold: {transactions.reduce(getSale, 0).toFixed(2)}</p>
+            </div>
+            <div className="w3-card w3-blue w3-center w3-round-large" style={{width:'20%'}}>
+              <p>Total Realized Profit: {transactions.reduce(getRealGain, 0).toFixed(2)}</p>
+            </div>
+          </div>
+          <div className="w3-center w3-margin-bottom w3-margin-top" style={{ fontSize: '2.5rem' }}>Portfolio</div>
           <table className="w3-table w3-bordered" style={{ width: '50%', marginLeft: 'auto', marginRight: 'auto' }}>
-            <tr>
-              <th>Shares</th>
-              <th style={{ textAlign: 'right', width:'20%' }}>Qty in hand</th>
-              <th style={{ textAlign: 'right', width:'20%' }}>Average Cost</th>
-              <th style={{ textAlign: 'right', width:'25%' }}>Purchase Value</th>
-            </tr>
-            {records.map((record) => (
+            <thead>
               <tr>
-                <td>{record.company}</td>
-                <td style={{ textAlign: 'right' }}>{record.qtyinhand}</td>
-                <td style={{ textAlign: 'right' }}>{record.avgrate.toFixed(2)}</td>
-                <td style={{ textAlign: 'right' }}>{record.cost.toFixed(2)}</td>
+                <th>Shares</th>
+                <th style={{ textAlign: 'right', width: '20%' }}>Qty in hand</th>
+                <th style={{ textAlign: 'right', width: '20%' }}>Average Cost</th>
+                <th style={{ textAlign: 'right', width: '25%' }}>Purchase Value</th>
               </tr>
-            ))}
-            <tr>
-              <td colspan='3' style={{ textAlign: 'right' }}>Total Purchase Value</td>
-              <th  style={{ textAlign: 'right' }}>{getTotal().toFixed(2)}</th>
-            </tr>
+            </thead>
+            <tbody>
+              {portfolio.map((record) => (
+                <tr>
+                  <td>{record.company}</td>
+                  <td style={{ textAlign: 'right' }}>{record.qty}</td>
+                  <td style={{ textAlign: 'right' }}>{parseFloat(record.avgrate).toFixed(2)}</td>
+                  <td style={{ textAlign: 'right' }}>{parseFloat(record.avgcost).toFixed(2)}</td>
+                </tr>
+              ))}
+              <tr>
+                <td colSpan='3' style={{ textAlign: 'right' }}>Total Portfolio Value</td>
+                <th style={{ textAlign: 'right' }}>{getTotal().toFixed(2)}</th>
+              </tr>
+            </tbody>
           </table>
         </>
       ) : (
         <>
-        <h1 style={{textAlign:'center', marginTop:'5%'}}>Please login to use the Portfolio Tracker</h1>
+          <h1 style={{ textAlign: 'center', marginTop: '5%' }}>Please login to use the Portfolio Tracker</h1>
         </>
       )}
     </div>

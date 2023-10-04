@@ -31,7 +31,11 @@ export default function Sell() {
         };
       })
       .catch(err => {
-        toast.error("Server Error");
+        if(err.message === "Request aborted"){
+          ;
+        } else{
+          toast.error("Server Error");
+        };
       });
   });
 

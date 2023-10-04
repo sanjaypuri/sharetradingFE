@@ -6,6 +6,10 @@ export default function ReportAllBuy() {
 
   const token = sessionStorage.getItem("spbysptoken")
   const [records, setRecords] = useState([]);
+  const stockstyleR = { textAlign: 'right', color:'black' };
+  const nostockstyleR = { textAlign: 'right', color:'gray' };
+  const stockstyle = { color:'black' };
+  const nostockstyle = { color:'gray' };
 
   useEffect(() => {
     if (!token) return;
@@ -22,7 +26,11 @@ export default function ReportAllBuy() {
         };
       })
       .catch(err => {
-        toast.error("Server Error");
+        if(err.message === "Request aborted"){
+          ;
+        } else{
+          toast.error("Server Error");
+        };
       });
   });
 
@@ -41,14 +49,14 @@ export default function ReportAllBuy() {
   }
 
   const getTotal = () => {
-    const totalCost = records.reduce((total, record) => total + record.cost, 0);
+    const totalCost = records.reduce((total, record) => total + parseFloat(record.amount), 0);
       return totalCost;
   };
 
   return (
     <div>
       <div className="w3-center w3-margin-bottom w3-margin-top" style={{ fontSize: '2.5rem' }}>
-        List of all Purchased Shares
+        Purchased Shares History
       </div>
       <table className="w3-table w3-bordered" style={{ width: '50%', marginLeft: 'auto', marginRight: 'auto' }}>
         <tr>
@@ -60,11 +68,11 @@ export default function ReportAllBuy() {
         </tr>
         {records.map((record) => (
           <tr className="w3-hover-pale-blue">
-            <td>{record.company}</td>
-            <td>{toDateString(record.date)}</td>
-            <td style={{ textAlign: 'right' }}>{record.qty}</td>
-            <td style={{ textAlign: 'right' }}>{record.rate.toFixed(2)}</td>
-            <td style={{ textAlign: 'right' }}>{record.cost.toFixed(2)}</td>
+            <td style={record.issold ? nostockstyle : stockstyle}>{record.company}</td>
+            <td style={record.issold ? nostockstyle : stockstyle}>{toDateString(record.tdate)}</td>
+            <td style={record.issold ? nostockstyleR : stockstyleR}>{record.qty}</td>
+            <td style={record.issold ? nostockstyleR : stockstyleR}>{parseFloat(record.rate).toFixed(2)}</td>
+            <td style={record.issold ? nostockstyleR : stockstyleR}>{parseFloat(record.amount).toFixed(2)}</td>
           </tr>
         ))}
         <tr>

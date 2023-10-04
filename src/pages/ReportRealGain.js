@@ -24,7 +24,11 @@ export default function ReportRealGain() {
         };
       })
       .catch(err => {
-        toast.error("Server Error");
+        if(err.message === "Request aborted"){
+          ;
+        } else{
+          toast.error("Server Error");
+        };
       });
   });
 
