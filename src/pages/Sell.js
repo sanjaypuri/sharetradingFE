@@ -115,9 +115,24 @@ export default function Sell() {
     return true;
   };
 
+  const closeAlert = () => {
+    document.getElementById("alert").style.display='none';
+    document.getElementById("title").style.display="block";
+  };
+
   return (
     <div>
-      <h3 className="w3-blue w3-center">Click on the below available share to sell</h3>
+      {/* <h3 className="w3-blue w3-center">Click on the below available share to sell</h3> */}
+      <div id="alert" className="w3-panel w3-red w3-display-container">
+        <span onClick={closeAlert}
+          className="w3-button w3-red w3-large w3-display-topright">x</span>
+        <p></p>
+        <h3 className="w3-center">Click on the below available share to sell</h3>
+        <p></p>
+      </div>
+      <div id="title" style={{display:'none'}}>
+        <h2 className="w3-center">Sale Details</h2>
+      </div>
       <table
         className="w3-table w3-bordered w3-hoverable"
         style={{

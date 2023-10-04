@@ -40,6 +40,11 @@ export default function ReportAllSold() {
     return str;
   }
 
+  const getTotal = () => {
+    const totalCost = records.reduce((total, record) => total + record.soldvalue, 0);
+      return totalCost;
+  };
+
   return (
     <div>
       <div className="w3-center w3-margin-bottom w3-margin-top" style={{ fontSize: '2.5rem' }}>
@@ -51,7 +56,7 @@ export default function ReportAllSold() {
           <th>Purchase Date</th>
           <th style={{ textAlign: 'right' }}>Qty</th>
           <th style={{ textAlign: 'right' }}>Rate</th>
-          <th style={{ textAlign: 'right' }}>Total Cost</th>
+          <th style={{ textAlign: 'right' }}>Sold Value</th>
         </tr>
         {records.map((record) => (
           <tr className="w3-hover-pale-blue">
@@ -62,6 +67,10 @@ export default function ReportAllSold() {
             <td style={{ textAlign: 'right' }}>{record.soldvalue.toFixed(2)}</td>
           </tr>
         ))}
+        <tr>
+          <td colspan='4' style={{ textAlign: 'right' }}>Total Sold Value</td>
+          <th style={{ textAlign: 'right' }}>{getTotal().toFixed(2)}</th>
+        </tr>
       </table>
     </div>
   );

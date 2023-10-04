@@ -28,6 +28,11 @@ export default function Home() {
       });
   });
 
+  const getTotal = () => {
+    const totalCost = records.reduce((total, record) => total + record.cost, 0);
+      return totalCost;
+  };
+
   return (
     <div>
       {token ? (
@@ -48,6 +53,10 @@ export default function Home() {
                 <td style={{ textAlign: 'right' }}>{record.cost.toFixed(2)}</td>
               </tr>
             ))}
+            <tr>
+              <td colspan='3' style={{ textAlign: 'right' }}>Total Purchase Value</td>
+              <th  style={{ textAlign: 'right' }}>{getTotal().toFixed(2)}</th>
+            </tr>
           </table>
         </>
       ) : (
