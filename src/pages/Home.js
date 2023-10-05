@@ -5,7 +5,6 @@ import axios from 'axios';
 export default function Home() {
 
   const token = sessionStorage.getItem("spbysptoken")
-  const user = sessionStorage.getItem("spbyspuser")
 
   const [portfolio, setPortfolio] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -32,8 +31,8 @@ export default function Home() {
         } else {
           toast.error("Server Error...");
         };
-      });
-  });
+      })
+  }, [token]);
 
   const getTotal = () => {
     const totalCost = portfolio.reduce((total, record) => total + parseFloat(record.avgcost), 0);
@@ -56,12 +55,27 @@ export default function Home() {
     }
   };
 
-  const getRealGain = (total, record) => {
-    if(record.qty < 0){
-      return total + -1*(parseFloat(record.rate)-parseFloat(record.purchaserate))*parseFloat(record.qty);
-    } else {
-      return total;
-    }
+  const getRealGain = () => {
+    let i = 0;
+    let totalBuyQty = 0;
+    let totalSellQty = 0;
+    let totalSale = 0;
+    let totalPur = 0;
+    for(i=0; i < transactions.length; i++){
+      if(transactions[i].qty > 0) {
+        totalBuyQty += transactions[i].qty;
+      }
+      if(transactions[i].qty < 0) {
+        totalSellQty -= transactions[i].qty;
+      }
+      if(transactions[i].qty > 0) {
+        totalPur += parseFloat(transactions[i].amount);
+      }
+      if(transactions[i].qty < 0) {
+        totalSale -= parseFloat(transactions[i].amount);
+      }
+    };
+    return ((totalSale/totalSellQty)-(totalPur/totalBuyQty))*totalSellQty;
   };
 
   return (
@@ -79,7 +93,7 @@ export default function Home() {
               <p>Total Sold: {transactions.reduce(getSale, 0).toFixed(2)}</p>
             </div>
             <div className="w3-card w3-blue w3-center w3-round-large" style={{width:'20%'}}>
-              <p>Total Realized Profit: {transactions.reduce(getRealGain, 0).toFixed(2)}</p>
+              <p>Total Realized Profit: {getRealGain().toFixed(2)}</p>
             </div>
           </div>
           <div className="w3-center w3-margin-bottom w3-margin-top" style={{ fontSize: '2.5rem' }}>Portfolio</div>
@@ -97,7 +111,7 @@ export default function Home() {
                 <tr>
                   <td>{record.company}</td>
                   <td style={{ textAlign: 'right' }}>{record.qty}</td>
-                  <td style={{ textAlign: 'right' }}>{parseFloat(record.avgrate).toFixed(2)}</td>
+                  <td style={{ textAlign: 'right' }}>{(parseFloat(record.avgcost)/record.qty).toFixed(2)}</td>
                   <td style={{ textAlign: 'right' }}>{parseFloat(record.avgcost).toFixed(2)}</td>
                 </tr>
               ))}

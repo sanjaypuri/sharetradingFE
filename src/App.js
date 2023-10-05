@@ -9,7 +9,7 @@ import Buy from './pages/Buy';
 import Sell from './pages/Sell';
 import ReportAllBuy from './pages/ReportAllBuy';
 import ReportAllSold from './pages/ReportallSold';
-import ReportRealGain from './pages/ReportRealGain';
+import About from './pages/About';
 
 function App() {
   return (
@@ -25,7 +25,7 @@ function App() {
           <Route path="/sell" element={<Sell/>} />
           <Route path="/allbuy" element={<ReportAllBuy/>} />
           <Route path="/allsale" element={<ReportAllSold/>} />
-          <Route path="/realgain" element={<ReportRealGain/>} />
+          <Route path="/about" element={<About/>} />
         </Routes>
       </BrowserRouter>
     </>

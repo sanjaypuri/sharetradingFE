@@ -33,10 +33,10 @@ export default function Navbar() {
             <div className="w3-dropdown-content w3-bar-block w3-card-4">
               <Link to="/allbuy" className="w3-bar-item w3-button w3-hover-blue">All Purchases</Link>
               <Link to="/allsale" className="w3-bar-item w3-button w3-hover-blue">All Sales</Link>
-              <Link to="/realgain" className="w3-bar-item w3-button w3-hover-blue">Realized Gain</Link>
+              {/* <Link to="/realgain" className="w3-bar-item w3-button w3-hover-blue">Realized Gain</Link> */}
             </div>
           </div>
-          <Link to="/" className="w3-bar-item w3-button w3-hover-blue">About</Link>
+          <Link to="/about" className="w3-bar-item w3-button w3-hover-blue">About</Link>
           <span className="w3-bar-item w3-button w3-right w3-hover-blue" onClick={handleLogout}>Log out</span>
           <span className="w3-bar-item w3-right w3-text-indigo">Welcome<b> {user}</b></span>
         </>

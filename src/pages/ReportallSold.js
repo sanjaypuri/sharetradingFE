@@ -52,7 +52,7 @@ export default function ReportAllSold() {
   return (
     <div>
       <div className="w3-center w3-margin-bottom w3-margin-top" style={{ fontSize: '2.5rem' }}>
-        Sold Shares History
+      Shares Sold History
       </div>
       <table className="w3-table w3-bordered" style={{ width: '50%', marginLeft: 'auto', marginRight: 'auto' }}>
         <tr>

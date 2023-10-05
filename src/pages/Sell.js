@@ -10,12 +10,16 @@ export default function Sell() {
 
   const navigate = useNavigate();
 
-  const [records, setRecords] = useState([]);
-  const [company, setCompany] = useState(null);
+  // const [records, setRecords] = useState([]);
+  const [portfolio, setPortfolio] = useState([]);
+  const [company, setCompany] = useState([]);
+  const [shareid, setShareid] = useState(null);
   const [saledate, setSaledate] = useState(null);
   const [saleqty, setSaleqty] = useState(null);
   const [saleprice, setSaleprice] = useState(null);
   const [max, setMax] = useState(0);
+  // const [updateid, setUpdateid] = useState(0);
+  // const [purrate, setPurrate] = useState(0);
 
   useEffect(() => {
     axios.get("http://localhost:5000/api/portfolio", {
@@ -27,27 +31,30 @@ export default function Sell() {
         if (!res.data.success) {
           toast.error(res.data.error);
         } else {
-          setRecords(res.data.data);
+          setPortfolio(res.data.portfolio);
         };
       })
       .catch(err => {
-        if(err.message === "Request aborted"){
+        if (err.message === "Request aborted") {
           ;
-        } else{
+        } else {
           toast.error("Server Error");
         };
       });
   });
 
   const handleClick = (data) => {
+    setShareid(data.shareid);
     setCompany(data.company);
-    setMax(data.qtyinhand);
+    setMax(data.qty);
+    setSaledate("");
+    setSaleprice("");
+    setSaleqty(data.qty);
+    // setUpdateid(data.id);
+    // setPurrate(parseFloat(data.rate).toFixed(2));
     document.getElementById('id01').style.display = 'block';
     document.getElementById('saledate').value = null;
     document.getElementById('saleprice').value = null;
-    setSaledate("");
-    setSaleprice("");
-    setSaleqty(data.qtyinhand);
   };
 
   const handleCloseModel = () => {
@@ -62,8 +69,9 @@ export default function Sell() {
     axios.post("http://localhost:5000/api/sell", {
       selldate: saledate,
       sellrate: saleprice,
-      sellqty: saleqty,
-      company: company
+      sellqty: -1*saleqty,
+      shareid: shareid,
+      // purrate: purrate
     },
       {
         headers: {
@@ -86,7 +94,6 @@ export default function Sell() {
   };
 
   const validForm = () => {
-    alert(saleprice);
     const today = moment();
     if (saledate === null || saledate === "") {
       toast.error("Please enter a date of Sale");
@@ -120,13 +127,12 @@ export default function Sell() {
   };
 
   const closeAlert = () => {
-    document.getElementById("alert").style.display='none';
-    document.getElementById("title").style.display="block";
+    document.getElementById("alert").style.display = 'none';
+    document.getElementById("title").style.display = "block";
   };
 
   return (
     <div>
-      {/* <h3 className="w3-blue w3-center">Click on the below available share to sell</h3> */}
       <div id="alert" className="w3-panel w3-red w3-display-container">
         <span onClick={closeAlert}
           className="w3-button w3-red w3-large w3-display-topright">x</span>
@@ -134,7 +140,7 @@ export default function Sell() {
         <h3 className="w3-center">Click on the below available share to sell</h3>
         <p></p>
       </div>
-      <div id="title" style={{display:'none'}}>
+      <div id="title" style={{ display: 'none' }}>
         <h2 className="w3-center">Sale Details</h2>
       </div>
       <table
@@ -147,13 +153,15 @@ export default function Sell() {
         <tr>
           <th>Shares</th>
           <th style={{ textAlign: 'right', width: '20%' }}>Qty in Hand</th>
+          <th style={{ textAlign: 'right', width: '20%' }}>Average Rate</th>
           <th style={{ textAlign: 'right', width: '20%' }}>Purchase Value</th>
         </tr>
-        {records.map((record) => (
+        {portfolio.map((record) => (
           <tr class="w3-hover-pale-blue" onClick={() => { handleClick(record) }}>
             <td>{record.company}</td>
-            <td style={{ textAlign: 'right' }}>{record.qtyinhand}</td>
-            <td style={{ textAlign: 'right' }}>{record.cost.toFixed(2)}</td>
+            <td style={{ textAlign: 'right' }}>{parseInt(record.qty)}</td>
+            <td style={{ textAlign: 'right' }}>{parseInt(record.avgrate)}</td>
+            <td style={{ textAlign: 'right' }}>{parseFloat(record.avgcost).toFixed(2)}</td>
           </tr>
         ))}
       </table>
@@ -162,7 +170,6 @@ export default function Sell() {
           <div className="w3-container">
             <span onClick={handleCloseModel} class="w3-button w3-display-topright">&times;</span>
             <h5 className="w3-center w3-text-blue">{company}</h5>
-            {/* <h6 className="w3-center w3-text-blue">Purchased date {dateDDMMMYYYY(buydate)}</h6> */}
             <form className="w3-container w3-padding">
               <label className="w3-text-blue"><b>Date of Sale</b></label>
               <input id="saledate" className="w3-input w3-border" type="date" onChange={(e) => { setSaledate(e.target.value) }} />
