@@ -10,16 +10,13 @@ export default function Sell() {
 
   const navigate = useNavigate();
 
-  // const [records, setRecords] = useState([]);
   const [portfolio, setPortfolio] = useState([]);
   const [company, setCompany] = useState([]);
-  const [shareid, setShareid] = useState(null);
+  const [shareid, setShareid] = useState([]);
   const [saledate, setSaledate] = useState(null);
   const [saleqty, setSaleqty] = useState(null);
   const [saleprice, setSaleprice] = useState(null);
   const [max, setMax] = useState(0);
-  // const [updateid, setUpdateid] = useState(0);
-  // const [purrate, setPurrate] = useState(0);
 
   useEffect(() => {
     axios.get("http://localhost:5000/api/portfolio", {
@@ -43,21 +40,19 @@ export default function Sell() {
       });
   });
 
-  const handleClick = (data) => {
-    setShareid(data.shareid);
+  const handleOpenModal = (data) => {
     setCompany(data.company);
     setMax(data.qty);
     setSaledate("");
     setSaleprice("");
     setSaleqty(data.qty);
-    // setUpdateid(data.id);
-    // setPurrate(parseFloat(data.rate).toFixed(2));
     document.getElementById('id01').style.display = 'block';
     document.getElementById('saledate').value = null;
     document.getElementById('saleprice').value = null;
+    setShareid(data.shareid);
   };
 
-  const handleCloseModel = () => {
+  const handleCloseModal = () => {
     document.getElementById('id01').style.display = 'none'
   };
 
@@ -67,11 +62,10 @@ export default function Sell() {
       return;
     }
     axios.post("http://localhost:5000/api/sell", {
-      selldate: saledate,
-      sellrate: saleprice,
-      sellqty: -1*saleqty,
+      tdate: saledate,
+      rate: saleprice,
+      qty: -1 * saleqty,
       shareid: shareid,
-      // purrate: purrate
     },
       {
         headers: {
@@ -88,7 +82,6 @@ export default function Sell() {
         };
       })
       .catch(err => {
-        console.log(err);
         toast.error(err);
       })
   };
@@ -157,27 +150,27 @@ export default function Sell() {
           <th style={{ textAlign: 'right', width: '20%' }}>Purchase Value</th>
         </tr>
         {portfolio.map((record) => (
-          <tr class="w3-hover-pale-blue" onClick={() => { handleClick(record) }}>
+          <tr className="w3-hover-pale-blue" onClick={() => { handleOpenModal(record) }}>
             <td>{record.company}</td>
             <td style={{ textAlign: 'right' }}>{parseInt(record.qty)}</td>
-            <td style={{ textAlign: 'right' }}>{parseInt(record.avgrate)}</td>
+            <td style={{ textAlign: 'right' }}>{parseFloat(record.avgrate).toFixed(2)}</td>
             <td style={{ textAlign: 'right' }}>{parseFloat(record.avgcost).toFixed(2)}</td>
           </tr>
         ))}
       </table>
-      <div id="id01" class="w3-modal">
+      <div id="id01" className="w3-modal">
         <div className="w3-modal-content" style={{ width: '35%' }}>
           <div className="w3-container">
-            <span onClick={handleCloseModel} class="w3-button w3-display-topright">&times;</span>
+            <span onClick={handleCloseModal} className="w3-button w3-display-topright">&times;</span>
             <h5 className="w3-center w3-text-blue">{company}</h5>
-            <form className="w3-container w3-padding">
+            <form onSubmit={handleSave} className="w3-container w3-padding">
               <label className="w3-text-blue"><b>Date of Sale</b></label>
               <input id="saledate" className="w3-input w3-border" type="date" onChange={(e) => { setSaledate(e.target.value) }} />
               <label className="w3-text-blue"><b>Sale Price</b></label>
               <input id="saleprice" className="w3-input w3-border" type="text" onChange={(e) => { setSaleprice(e.target.value) }} />
               <label className="w3-text-blue"><b>Sale Qty</b></label>
               <input id="saleqty" className="w3-input w3-border" value={saleqty} type="number" onChange={(e) => { setSaleqty(e.target.value) }} />
-              <button className="w3-btn w3-blue w3-margin-top" style={{ width: '100%' }} onClick={handleSave} >Save</button>
+              <button type="submit" className="w3-btn w3-blue w3-margin-top" style={{ width: '100%' }} >Save</button>
             </form>
           </div>
         </div>

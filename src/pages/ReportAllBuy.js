@@ -1,15 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import axios from 'axios';
+import moment from 'moment';
+import { useNavigate } from 'react-router-dom';
 
 export default function ReportAllBuy() {
 
   const token = sessionStorage.getItem("spbysptoken")
-  const [records, setRecords] = useState([]);
+  const navigate = useNavigate();
+
+  const [transactions, setTransactions] = useState([]);
+  const [shareid, setShareid] = useState('');
+  const [recid, setRecid] = useState('');
+  const [company, setCompany] = useState('');
+  // const [purchasedate, setPurchasedate] = useState('');
+  const [purchaseprice, setPurchaseprice] = useState('');
+  const [purchaseqty, setPurchaseqty] = useState('');
+  const [tdate, setTdate] = useState('');
 
   useEffect(() => {
     if (!token) return;
-    axios.get("http://localhost:5000/api/allbuy", {
+    axios.get("http://localhost:5000/api/portfolio", {
       headers: {
         'token': token
       }
@@ -18,13 +29,14 @@ export default function ReportAllBuy() {
         if (!res.data.success) {
           toast.error(res.data.error);
         } else {
-          setRecords(res.data.data);
+          // setPortfolio(res.data.portfolio);
+          setTransactions(res.data.transactions);
         };
       })
       .catch(err => {
-        if(err.message === "Request aborted"){
+        if (err.message === "Request aborted") {
           ;
-        } else{
+        } else {
           toast.error("Server Error");
         };
       });
@@ -44,9 +56,125 @@ export default function ReportAllBuy() {
     return str;
   }
 
+  function toDateStringforInput(date) {
+    const mydate = new Date(date);
+    let str = "";
+    str += mydate.getFullYear() + "-";
+    if (mydate.getMonth() + 1 < 10) {
+      str += "0" + (mydate.getMonth() + 1) + "-";
+    } else {
+      str += (mydate.getMonth() + 1) + "-";
+    }
+    if (mydate.getDate() < 10) {
+      str += "0" + mydate.getDate();
+    } else {
+      str += mydate.getDate();
+    }
+    return str;
+  }
+
   const getTotal = () => {
-    const totalCost = records.reduce((total, record) => total + parseFloat(record.amount), 0);
-      return totalCost;
+    let i = 0;
+    let total = 0;
+    for (i = 0; i < transactions.length; i++) {
+      if (transactions[i].qty > 0) {
+        total += parseFloat(transactions[i].amount);
+      }
+    };
+    return total;
+  };
+
+  const handleModal = (record) => {
+    setRecid(record.id);
+    setShareid(record.shareid);
+    setCompany(record.company);
+    setPurchaseprice(parseFloat(record.rate));
+    setPurchaseqty(record.qty);
+    setTdate(record.tdate);
+    document.getElementById('id01').style.display = 'block';
+    document.getElementById('purdate').value = toDateStringforInput(record.tdate)
+    document.getElementById('purprice').value = record.rate;
+    document.getElementById('purqty').value = record.qty;
+  };
+
+  const handleCloseModal = () => {
+    document.getElementById('id01').style.display = 'none';
+  };
+
+  const getMinQty = (id) => {
+    let i = 0;
+    let total = 0;
+    for (i = 0; i < transactions.length; i++) {
+      if (transactions[i].shareid === id && transactions[i].qty < 0) {
+        total += transactions[i].qty;
+      }
+    }
+    return -1 * total;
+  };
+
+  const validForm = () => {
+    const today = moment();
+    if (tdate === null) {
+      toast.error("Please enter a date of Purchase");
+      return false;
+    };
+    if (tdate > today.format("YYYY-MM-DD")) {
+      toast.error("Purchase date should not be after today")
+      return false;
+    };
+    if (purchaseprice === '' || purchaseprice === null) {
+      toast.error("Please enter Purchase Rate");
+      return false;
+    };
+    if (!parseFloat(purchaseprice)) {
+      toast.error("Rate entered is not a valid number");
+      return false;
+    };
+    if (purchaseqty === '' || purchaseqty === null) {
+      toast.error("Please enter Purchase Qty");
+      return false;
+    };
+    if (!parseInt(purchaseqty)) {
+      toast.error("Qty entered is not a valid number");
+      return false;
+    };
+    const minQty = getMinQty(shareid);
+    if (parseInt(purchaseqty) < minQty) {
+      toast.error("Qty bought cannot be less qty sold")
+      return false;
+    }
+    return true;
+  };
+
+  const handleSave = (event) => {
+    event.preventDefault();
+    if (!validForm()) {
+      return;
+    }
+    axios.put("http://localhost:5000/api/tupdate", {
+      shareid: shareid,
+      tdate: tdate,
+      qty: purchaseqty,
+      rate: purchaseprice,
+      id: recid
+    },
+      {
+        headers: {
+          token: token
+        }
+      }
+    )
+      .then(res => {
+        if (res.data.success) {
+          toast.success(res.data.message);
+          navigate('/');
+        } else {
+          toast.error(res.data.error);
+        };
+      })
+      .catch(err => {
+        toast.error(err);
+      })
   };
 
   return (
@@ -62,13 +190,20 @@ export default function ReportAllBuy() {
           <th style={{ textAlign: 'right' }}>Rate</th>
           <th style={{ textAlign: 'right' }}>Purchase Value</th>
         </tr>
-        {records.map((record) => (
-          <tr className="w3-hover-pale-blue">
-            <td>{record.company}</td>
-            <td>{toDateString(record.tdate)}</td>
-            <td style={{ textAlign: 'right'}}>{record.qty}</td>
-            <td style={{ textAlign: 'right'}}>{parseFloat(record.rate).toFixed(2)}</td>
-            <td style={{ textAlign: 'right'}}>{parseFloat(record.amount).toFixed(2)}</td>
+        {transactions.map((record) => (
+          <tr className="w3-hover-pale-blue" onClick={() => { handleModal(record) }}>
+            {(record.qty > 0 ?
+              (<>
+                <td>{record.company}</td>
+                <td>{toDateString(record.tdate)}</td>
+                <td style={{ textAlign: 'right' }}>{record.qty}</td>
+                <td style={{ textAlign: 'right' }}>{parseFloat(record.rate).toFixed(2)}</td>
+                <td style={{ textAlign: 'right' }}>{parseFloat(record.amount).toFixed(2)}</td>
+              </>
+              ) : (
+                <>
+                </>
+              ))}
           </tr>
         ))}
         <tr>
@@ -76,6 +211,23 @@ export default function ReportAllBuy() {
           <th style={{ textAlign: 'right' }}>{getTotal().toFixed(2)}</th>
         </tr>
       </table>
+      <div id="id01" className="w3-modal">
+        <div className="w3-modal-content" style={{ width: '35%' }}>
+          <div className="w3-container">
+            <span onClick={handleCloseModal} className="w3-button w3-display-topright">&times;</span>
+            <h5 className="w3-center w3-text-blue">{company}</h5>
+            <form className="w3-container w3-padding">
+              <label className="w3-text-blue"><b>Purchase Date</b></label>
+              <input id="purdate" className="w3-input w3-border" type="date" onChange={(e) => { setTdate(e.target.value) }} />
+              <label className="w3-text-blue"><b>Purchase Price</b></label>
+              <input id="purprice" className="w3-input w3-border" type="text" onChange={(e) => { setPurchaseprice(e.target.value) }} />
+              <label className="w3-text-blue"><b>Purchase Qty</b></label>
+              <input id="purqty" className="w3-input w3-border" type="number" onChange={(e) => { setPurchaseqty(e.target.value) }} />
+              <button className="w3-btn w3-blue w3-margin-top" style={{ width: '100%' }} onClick={handleSave} >Save</button>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

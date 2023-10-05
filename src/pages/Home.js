@@ -8,6 +8,7 @@ export default function Home() {
 
   const [portfolio, setPortfolio] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [profit, setProfit] = useState([]);
 
 
   useEffect(() => {
@@ -23,6 +24,7 @@ export default function Home() {
         } else {
           setPortfolio(res.data.portfolio);
           setTransactions(res.data.transactions);
+          setProfit(res.data.gain);
         };
       })
       .catch(err => {
@@ -56,26 +58,56 @@ export default function Home() {
   };
 
   const getRealGain = () => {
-    let i = 0;
-    let totalBuyQty = 0;
-    let totalSellQty = 0;
-    let totalSale = 0;
-    let totalPur = 0;
-    for(i=0; i < transactions.length; i++){
-      if(transactions[i].qty > 0) {
-        totalBuyQty += transactions[i].qty;
-      }
-      if(transactions[i].qty < 0) {
-        totalSellQty -= transactions[i].qty;
-      }
-      if(transactions[i].qty > 0) {
-        totalPur += parseFloat(transactions[i].amount);
-      }
-      if(transactions[i].qty < 0) {
-        totalSale -= parseFloat(transactions[i].amount);
-      }
-    };
-    return ((totalSale/totalSellQty)-(totalPur/totalBuyQty))*totalSellQty;
+    // axios.get("http://localhost:5000/api/realgain", {
+    //   headers: {
+    //     'token': token
+    //   }
+    // }, [])
+    //   .then(res => {
+    //     if (!res.data.success) {
+    //       toast.error(res.data.error);
+    //     } else {
+    //       setProfit(res.data.data);
+    //     };
+    //   })
+    //   .catch(err => {
+    //     if (err.message === "Request aborted") {
+    //       ;
+    //     } else {
+    //       toast.error("Server Error...");
+    //     };
+    //   })
+
+      let i = 0;
+      let totalGain = 0;
+      for(i = 0; i < profit.length; i++){
+        totalGain += parseFloat(profit[i].amount) 
+      };
+      return -1*totalGain;
+    // let i = 0;
+    // let totalBuyQty = 0;
+    // let totalSellQty = 0;
+    // let totalSale = 0;
+    // let totalPur = 0;
+    // for(i=0; i < transactions.length; i++){
+    //   if(transactions[i].qty > 0) {
+    //     totalBuyQty += transactions[i].qty;
+    //   }
+    //   if(transactions[i].qty < 0) {
+    //     totalSellQty -= transactions[i].qty;
+    //   }
+    //   if(transactions[i].qty > 0) {
+    //     totalPur += parseFloat(transactions[i].amount);
+    //   }
+    //   if(transactions[i].qty < 0) {
+    //     totalSale -= parseFloat(transactions[i].amount);
+    //   }
+    // };
+    // if (totalSale === 0 || totalPur === 0 ){
+    //   return 0;
+    // }else {
+    //   return ((totalSale/totalSellQty)-(totalPur/totalBuyQty))*totalSellQty;
+    // };
   };
 
   return (
