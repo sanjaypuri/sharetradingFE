@@ -13,7 +13,6 @@ export default function ReportAllBuy() {
   const [shareid, setShareid] = useState('');
   const [recid, setRecid] = useState('');
   const [company, setCompany] = useState('');
-  // const [purchasedate, setPurchasedate] = useState('');
   const [purchaseprice, setPurchaseprice] = useState('');
   const [purchaseqty, setPurchaseqty] = useState('');
   const [tdate, setTdate] = useState('');
@@ -29,7 +28,6 @@ export default function ReportAllBuy() {
         if (!res.data.success) {
           toast.error(res.data.error);
         } else {
-          // setPortfolio(res.data.portfolio);
           setTransactions(res.data.transactions);
         };
       })
@@ -74,14 +72,10 @@ export default function ReportAllBuy() {
   }
 
   const getTotal = () => {
-    let i = 0;
-    let total = 0;
-    for (i = 0; i < transactions.length; i++) {
-      if (transactions[i].qty > 0) {
-        total += parseFloat(transactions[i].amount);
-      }
-    };
-    return total;
+    const myTotal = transactions.reduce((total, record) =>
+      record.qty > 0 ? total + parseFloat(record.amount) : total,
+      0);
+    return myTotal;
   };
 
   const handleModal = (record) => {
@@ -95,21 +89,22 @@ export default function ReportAllBuy() {
     document.getElementById('purdate').value = toDateStringforInput(record.tdate)
     document.getElementById('purprice').value = record.rate;
     document.getElementById('purqty').value = record.qty;
-  };
+    document.getElementById("purdate").disabled = true;
+    document.getElementById("purprice").disabled = true;
+    document.getElementById("purqty").disabled = true;
+    document.getElementById("delete").disabled = false;
+    document.getElementById("editsave").innerText = "Edit";
+};
 
   const handleCloseModal = () => {
     document.getElementById('id01').style.display = 'none';
   };
 
   const getMinQty = (id) => {
-    let i = 0;
-    let total = 0;
-    for (i = 0; i < transactions.length; i++) {
-      if (transactions[i].shareid === id && transactions[i].qty < 0) {
-        total += transactions[i].qty;
-      }
-    }
-    return -1 * total;
+    const Min = transactions.reduce((total, record) =>
+      (record.shareid === id && record.qty < 0) ? total + record.qty : total,
+      0);
+    return -1*Min;
   };
 
   const validForm = () => {
@@ -126,6 +121,10 @@ export default function ReportAllBuy() {
       toast.error("Please enter Purchase Rate");
       return false;
     };
+    if (parseFloat(purchaseprice) === 0) {
+      toast.error("Purchase Rate cannot be 0");
+      return false;
+    };
     if (!parseFloat(purchaseprice)) {
       toast.error("Rate entered is not a valid number");
       return false;
@@ -134,11 +133,16 @@ export default function ReportAllBuy() {
       toast.error("Please enter Purchase Qty");
       return false;
     };
+    if (parseInt(purchaseqty) === 0) {
+      toast.error("Purchase Qty cannot be 0");
+      return false;
+    };
     if (!parseInt(purchaseqty)) {
       toast.error("Qty entered is not a valid number");
       return false;
     };
     const minQty = getMinQty(shareid);
+    alert("min:" + minQty)
     if (parseInt(purchaseqty) < minQty) {
       toast.error("Qty bought cannot be less qty sold")
       return false;
@@ -148,16 +152,58 @@ export default function ReportAllBuy() {
 
   const handleSave = (event) => {
     event.preventDefault();
-    if (!validForm()) {
+    if (document.getElementById("editsave").innerText === "Edit") {
+      document.getElementById("purdate").disabled = false;
+      document.getElementById("purprice").disabled = false;
+      document.getElementById("purqty").disabled = false;
+      document.getElementById("delete").disabled = true;
+      document.getElementById("editsave").innerText = "Save";
+    } else {
+      if (!validForm()) {
+        return;
+      }
+      axios.put("http://localhost:5000/api/update", {
+        shareid: shareid,
+        tdate: tdate,
+        qty: purchaseqty,
+        rate: purchaseprice,
+        id: recid
+      },
+        {
+          headers: {
+            token: token
+          }
+        }
+      )
+        .then(res => {
+          if (res.data.success) {
+            toast.success(res.data.message);
+            navigate('/');
+          } else {
+            toast.error(res.data.error);
+          };
+        })
+        .catch(err => {
+          toast.error(err);
+        })
+    };
+  };
+
+  const getStock = (shareid) => {
+    const stock = transactions.reduce((total, record) =>
+      record.sharid === shareid ? total + parseFloat(record.qty) : total,
+      0);
+    return stock;
+  };
+
+  const handleDelete = (event) => {
+    event.preventDefault();
+    let stockinHand = getStock(shareid);
+    if (purchaseqty > stockinHand) {
+      toast.error("Shares already sold. Cannot delete.");
       return;
     }
-    axios.put("http://localhost:5000/api/tupdate", {
-      shareid: shareid,
-      tdate: tdate,
-      qty: purchaseqty,
-      rate: purchaseprice,
-      id: recid
-    },
+    axios.delete(`http://localhost:5000/api/delete/${recid}`,
       {
         headers: {
           token: token
@@ -218,12 +264,15 @@ export default function ReportAllBuy() {
             <h5 className="w3-center w3-text-blue">{company}</h5>
             <form className="w3-container w3-padding">
               <label className="w3-text-blue"><b>Purchase Date</b></label>
-              <input id="purdate" className="w3-input w3-border" type="date" onChange={(e) => { setTdate(e.target.value) }} />
+              <input id="purdate" className="w3-input w3-border" type="date" onChange={(e) => { setTdate(e.target.value) }} disabled />
               <label className="w3-text-blue"><b>Purchase Price</b></label>
-              <input id="purprice" className="w3-input w3-border" type="text" onChange={(e) => { setPurchaseprice(e.target.value) }} />
+              <input id="purprice" className="w3-input w3-border" type="text" onChange={(e) => { setPurchaseprice(e.target.value) }} disabled />
               <label className="w3-text-blue"><b>Purchase Qty</b></label>
-              <input id="purqty" className="w3-input w3-border" type="number" onChange={(e) => { setPurchaseqty(e.target.value) }} />
-              <button className="w3-btn w3-blue w3-margin-top" style={{ width: '100%' }} onClick={handleSave} >Save</button>
+              <input id="purqty" className="w3-input w3-border" type="number" onChange={(e) => { setPurchaseqty(e.target.value) }} disabled />
+              <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+                <button id="editsave" className="w3-btn w3-blue w3-margin-top w3-margin-right" style={{ width: '30%' }} onClick={handleSave} >Edit</button>
+                <button id="delete" className="w3-btn w3-red w3-margin-top" style={{ width: '30%' }} onClick={handleDelete} >Delete</button>
+              </div>
             </form>
           </div>
         </div>

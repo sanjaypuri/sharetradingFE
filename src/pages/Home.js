@@ -9,7 +9,7 @@ export default function Home() {
   const [portfolio, setPortfolio] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [profit, setProfit] = useState([]);
-
+  const [totalGain, setTotalGain] = useState(0);
 
   useEffect(() => {
     if (!token) return;
@@ -34,7 +34,8 @@ export default function Home() {
           toast.error("Server Error...");
         };
       })
-  }, [token]);
+    getRealGain();
+  });
 
   const getTotal = () => {
     const totalCost = portfolio.reduce((total, record) => total + parseFloat(record.avgcost), 0);
@@ -42,7 +43,7 @@ export default function Home() {
   };
 
   const getPurchase = (total, record) => {
-    if(record.qty >= 0){
+    if (record.qty >= 0) {
       return total + parseFloat(record.amount);
     } else {
       return total;
@@ -50,64 +51,16 @@ export default function Home() {
   };
 
   const getSale = (total, record) => {
-    if(record.qty < 0){
-      return total + -1*parseFloat(record.amount);
+    if (record.qty < 0) {
+      return total + -1 * parseFloat(record.amount);
     } else {
       return total;
     }
   };
 
   const getRealGain = () => {
-    // axios.get("http://localhost:5000/api/realgain", {
-    //   headers: {
-    //     'token': token
-    //   }
-    // }, [])
-    //   .then(res => {
-    //     if (!res.data.success) {
-    //       toast.error(res.data.error);
-    //     } else {
-    //       setProfit(res.data.data);
-    //     };
-    //   })
-    //   .catch(err => {
-    //     if (err.message === "Request aborted") {
-    //       ;
-    //     } else {
-    //       toast.error("Server Error...");
-    //     };
-    //   })
-
-      let i = 0;
-      let totalGain = 0;
-      for(i = 0; i < profit.length; i++){
-        totalGain += parseFloat(profit[i].amount) 
-      };
-      return -1*totalGain;
-    // let i = 0;
-    // let totalBuyQty = 0;
-    // let totalSellQty = 0;
-    // let totalSale = 0;
-    // let totalPur = 0;
-    // for(i=0; i < transactions.length; i++){
-    //   if(transactions[i].qty > 0) {
-    //     totalBuyQty += transactions[i].qty;
-    //   }
-    //   if(transactions[i].qty < 0) {
-    //     totalSellQty -= transactions[i].qty;
-    //   }
-    //   if(transactions[i].qty > 0) {
-    //     totalPur += parseFloat(transactions[i].amount);
-    //   }
-    //   if(transactions[i].qty < 0) {
-    //     totalSale -= parseFloat(transactions[i].amount);
-    //   }
-    // };
-    // if (totalSale === 0 || totalPur === 0 ){
-    //   return 0;
-    // }else {
-    //   return ((totalSale/totalSellQty)-(totalPur/totalBuyQty))*totalSellQty;
-    // };
+    const gain = profit.reduce((total, record) => total + parseFloat(record.amount), 0);
+    setTotalGain(-1 * gain);
   };
 
   return (
@@ -118,14 +71,20 @@ export default function Home() {
             display: 'flex',
             justifyContent: 'space-around'
           }}>
-            <div className="w3-card w3-blue w3-center w3-round-large" style={{width:'20%'}}>
+            <div className="w3-card w3-blue w3-center w3-round-large" style={{ width: '20%' }}>
               <p>Total Purchased: {transactions.reduce(getPurchase, 0).toFixed(2)}</p>
             </div>
-            <div className="w3-card w3-blue w3-center w3-round-large" style={{width:'20%'}}>
+            <div className="w3-card w3-blue w3-center w3-round-large" style={{ width: '20%' }}>
               <p>Total Sold: {transactions.reduce(getSale, 0).toFixed(2)}</p>
             </div>
-            <div className="w3-card w3-blue w3-center w3-round-large" style={{width:'20%'}}>
-              <p>Total Realized Profit: {getRealGain().toFixed(2)}</p>
+            <div id="gain" className={
+              totalGain >= 0 ?
+                "w3-card w3-green w3-center w3-round-large w3-text-white"
+                :
+                "w3-card w3-red w3-center w3-round-large w3-text-white"
+            }
+              style={{ width: '20%' }}>
+              <p>Total Realized Profit: {totalGain}</p>
             </div>
           </div>
           <div className="w3-center w3-margin-bottom w3-margin-top" style={{ fontSize: '2.5rem' }}>Portfolio</div>
@@ -143,7 +102,7 @@ export default function Home() {
                 <tr>
                   <td>{record.company}</td>
                   <td style={{ textAlign: 'right' }}>{record.qty}</td>
-                  <td style={{ textAlign: 'right' }}>{(parseFloat(record.avgcost)/record.qty).toFixed(2)}</td>
+                  <td style={{ textAlign: 'right' }}>{(parseFloat(record.avgcost) / record.qty).toFixed(2)}</td>
                   <td style={{ textAlign: 'right' }}>{parseFloat(record.avgcost).toFixed(2)}</td>
                 </tr>
               ))}

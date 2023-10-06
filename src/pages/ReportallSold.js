@@ -11,6 +11,7 @@ export default function ReportAllSold() {
 
   const [transactions, setTransactions] = useState([]);
   const [shareid, setShareid] = useState('');
+  const [recid, setRecid] = useState('');
   const [company, setCompany] = useState('');
   const [saledate, setSaledate] = useState('');
   const [salerate, setSalerate] = useState('');
@@ -78,18 +79,25 @@ export default function ReportAllSold() {
         total += parseFloat(transactions[i].amount);
       }
     };
-    return -1*total;
+    return -1 * total;
   };
 
   const handleModal = (record) => {
+    setRecid(record.id);
     setShareid(record.shareid);
     setCompany(record.company);
     setSalerate(parseFloat(record.rate));
     setSaleqty(record.qty);
+    setSaledate(record.tdate);
     document.getElementById('id01').style.display = 'block';
     document.getElementById('saledate').value = toDateStringforInput(record.tdate)
     document.getElementById('saleprice').value = record.rate;
-    document.getElementById('saleqty').value = -1*record.qty;
+    document.getElementById('saleqty').value = -1 * record.qty;
+    document.getElementById("saledate").disabled = true;
+    document.getElementById("saleprice").disabled = true;
+    document.getElementById("saleqty").disabled = true;
+    document.getElementById("delete").disabled = false;
+    document.getElementById("editsave").innerText = "Edit";
   };
 
   const handleCloseModal = () => {
@@ -121,6 +129,10 @@ export default function ReportAllSold() {
       toast.error("Please enter Sale Rate");
       return false;
     };
+    if (parseFloat(salerate) === 0) {
+      toast.alert("Sale rate cannot be 0");
+      return;
+    }
     if (!parseFloat(salerate)) {
       toast.error("Rate entered is not a valid number");
       return false;
@@ -129,12 +141,16 @@ export default function ReportAllSold() {
       toast.error("Please enter Purchase Qty");
       return false;
     };
+    if (parseInt(saleqty) === 0) {
+      toast.alert("Sale qty cannot be 0");
+      return;
+    }
     if (!parseInt(saleqty)) {
       toast.error("Qty entered is not a valid number");
       return false;
     };
     const maxQty = getMaxQty(shareid);
-    if (parseInt(saleqty) < maxQty) {
+    if (parseInt(saleqty) > maxQty) {
       toast.error("Sold qty cannot be more than Purchased qty")
       return false;
     }
@@ -143,15 +159,46 @@ export default function ReportAllSold() {
 
   const handleSave = (event) => {
     event.preventDefault();
-    if (!validForm()) {
-      return;
-    }
-    axios.put("http://localhost:5000/api/tupdate", {
-      shareid: shareid,
-      tdate: saledate,
-      qty: saleqty,
-      rate: salerate
-    },
+    if (document.getElementById("editsave").innerText === "Edit") {
+      document.getElementById("saledate").disabled = false;
+      document.getElementById("saleprice").disabled = false;
+      document.getElementById("saleqty").disabled = false;
+      document.getElementById("delete").disabled = true;
+      document.getElementById("editsave").innerText = "Save";
+    } else {
+      if (!validForm()) {
+        return;
+      }
+      axios.put("http://localhost:5000/api/update", {
+        shareid: shareid,
+        tdate: saledate,
+        qty: saleqty,
+        rate: salerate,
+        id: recid
+      },
+        {
+          headers: {
+            token: token
+          }
+        }
+      )
+        .then(res => {
+          if (res.data.success) {
+            toast.success(res.data.message);
+            navigate('/');
+          } else {
+            toast.error(res.data.error);
+          };
+        })
+        .catch(err => {
+          toast.error(err);
+        })
+    };
+  };
+
+  const handleDelete = (event) => {
+    event.preventDefault();
+    axios.delete(`http://localhost:5000/api/delete/${recid}`,
       {
         headers: {
           token: token
@@ -159,6 +206,7 @@ export default function ReportAllSold() {
       }
     )
       .then(res => {
+        console.log(res.data);
         if (res.data.success) {
           toast.success(res.data.message);
           navigate('/');
@@ -167,42 +215,50 @@ export default function ReportAllSold() {
         };
       })
       .catch(err => {
+        console.log(err);
         toast.error(err);
       })
   };
+
   return (
     <div>
       <div className="w3-center w3-margin-bottom w3-margin-top" style={{ fontSize: '2.5rem' }}>
         Shares Sold History
       </div>
       <table className="w3-table w3-bordered" style={{ width: '50%', marginLeft: 'auto', marginRight: 'auto' }}>
-        <tr>
-          <th>Shares</th>
-          <th>Sold Date</th>
-          <th style={{ textAlign: 'right' }}>Qty</th>
-          <th style={{ textAlign: 'right' }}>Rate</th>
-          <th style={{ textAlign: 'right' }}>Sold Value</th>
-        </tr>
-        {transactions.map((record) => (
-          <tr className="w3-hover-pale-blue" onClick={() => { handleModal(record) }}>
-            {(record.qty < 0 ?
-              (<>
-                <td>{record.company}</td>
-                <td>{toDateString(record.tdate)}</td>
-                <td style={{ textAlign: 'right' }}>{-1 * (record.qty)}</td>
-                <td style={{ textAlign: 'right' }}>{parseFloat(record.rate).toFixed(2)}</td>
-                <td style={{ textAlign: 'right' }}>{(-1 * parseFloat(record.amount)).toFixed(2)}</td>
-              </>
-              ) : (
-              <>
-              </>
-              ))}
+        <thead>
+          <tr>
+            <th>Shares</th>
+            <th>Sold Date</th>
+            <th style={{ textAlign: 'right' }}>Qty</th>
+            <th style={{ textAlign: 'right' }}>Rate</th>
+            <th style={{ textAlign: 'right' }}>Sold Value</th>
           </tr>
-        ))}
-        <tr>
-          <td colspan='4' style={{ textAlign: 'right' }}>Total Sold Value</td>
-          <th style={{ textAlign: 'right' }}>{(getTotal()).toFixed(2)}</th>
-        </tr>
+        </thead>
+        <tbody>
+          {transactions.map((record) => (
+            <tr className="w3-hover-pale-blue" onClick={() => { handleModal(record) }}>
+              {(record.qty < 0 ?
+                (<>
+                  <td>{record.company}</td>
+                  <td>{toDateString(record.tdate)}</td>
+                  <td style={{ textAlign: 'right' }}>{-1 * (record.qty)}</td>
+                  <td style={{ textAlign: 'right' }}>{parseFloat(record.rate).toFixed(2)}</td>
+                  <td style={{ textAlign: 'right' }}>{(-1 * parseFloat(record.amount)).toFixed(2)}</td>
+                </>
+                ) : (
+                  <>
+                  </>
+                ))}
+            </tr>
+          ))}
+        </tbody>
+        <tfoot>
+          <tr>
+            <td colSpan='4' style={{ textAlign: 'right' }}>Total Sold Value</td>
+            <th style={{ textAlign: 'right' }}>{(getTotal()).toFixed(2)}</th>
+          </tr>
+        </tfoot>
       </table>
       <div id="id01" className="w3-modal">
         <div className="w3-modal-content" style={{ width: '35%' }}>
@@ -211,12 +267,15 @@ export default function ReportAllSold() {
             <h5 className="w3-center w3-text-blue">{company}</h5>
             <form className="w3-container w3-padding">
               <label className="w3-text-blue"><b>Sale Date</b></label>
-              <input id="saledate" className="w3-input w3-border" type="date" onChange={(e) => { setSaledate(e.target.value) }} />
+              <input id="saledate" className="w3-input w3-border" type="date" onChange={(e) => { setSaledate(e.target.value) }} disabled />
               <label className="w3-text-blue"><b>Sale Price</b></label>
-              <input id="saleprice" className="w3-input w3-border" type="text" onChange={(e) => { setSalerate(e.target.value) }} />
+              <input id="saleprice" className="w3-input w3-border" type="text" onChange={(e) => { setSalerate(e.target.value) }} disabled />
               <label className="w3-text-blue"><b>Sale Qty</b></label>
-              <input id="saleqty" className="w3-input w3-border" type="number" onChange={(e) => { setSaleqty(e.target.value) }} />
-              <button className="w3-btn w3-blue w3-margin-top" style={{ width: '100%' }} onClick={handleSave} >Save</button>
+              <input id="saleqty" className="w3-input w3-border" type="number" onChange={(e) => { setSaleqty(e.target.value) }} disabled />
+              <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+                <button id="editsave" className="w3-btn w3-blue w3-margin-top w3-margin-right" style={{ width: '30%' }} onClick={handleSave} >Edit</button>
+                <button id="delete" className="w3-btn w3-red w3-margin-top" style={{ width: '30%' }} onClick={handleDelete} >Delete</button>
+              </div>
             </form>
           </div>
         </div>
