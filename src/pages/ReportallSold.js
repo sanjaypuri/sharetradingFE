@@ -243,8 +243,8 @@ export default function ReportAllSold() {
                   <td>{record.company}</td>
                   <td>{toDateString(record.tdate)}</td>
                   <td style={{ textAlign: 'right' }}>{-1 * (record.qty)}</td>
-                  <td style={{ textAlign: 'right' }}>{parseFloat(record.rate).toFixed(2)}</td>
-                  <td style={{ textAlign: 'right' }}>{(-1 * parseFloat(record.amount)).toFixed(2)}</td>
+                  <td style={{ textAlign: 'right' }}>{parseFloat(record.rate).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2 })}</td>
+                  <td style={{ textAlign: 'right' }}>{(-1 * parseFloat(record.amount)).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2 })}</td>
                 </>
                 ) : (
                   <>
@@ -256,7 +256,7 @@ export default function ReportAllSold() {
         <tfoot>
           <tr>
             <td colSpan='4' style={{ textAlign: 'right' }}>Total Sold Value</td>
-            <th style={{ textAlign: 'right' }}>{(getTotal()).toFixed(2)}</th>
+            <th style={{ textAlign: 'right' }}>{(getTotal()).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2 })}</th>
           </tr>
         </tfoot>
       </table>

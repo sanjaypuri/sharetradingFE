@@ -5,13 +5,14 @@ import axios from 'axios';
 export default function ReportRealGain() {
 
   const token = sessionStorage.getItem("spbysptoken")
-  const [records, setRecords] = useState([]);
+  const [trecords, setTrecords] = useState([]);
+  const [grecords, setGrecords] = useState([]);
   const redstyle = { textAlign: 'right', color:'red' };
   const greenstyle = { textAlign: 'right', color:'green' };
 
   useEffect(() => {
     if (!token) return;
-    axios.get("http://localhost:5000/api/realgain", {
+    axios.get("http://localhost:5000/api/portfolio", {
       headers: {
         'token': token
       }
@@ -20,7 +21,8 @@ export default function ReportRealGain() {
         if (!res.data.success) {
           toast.error(res.data.error);
         } else {
-          setRecords(res.data.data);
+          setTrecords(res.data.transactions);
+          setGrecords(res.data.gain);
         };
       })
       .catch(err => {
@@ -32,28 +34,43 @@ export default function ReportRealGain() {
       });
   });
 
-  // function toDateString(date) {
-  //   const mydate = new Date(date);
-  //   let month = ["-Jan-", "-Feb-", "-Mar-", "-Apr-", "-May-", "-Jun-", "-Jul-", "-Aug-", "-Sep-", "-Oct-", "-Nov-", "-Dec-"];
-  //   let str = "";
-  //   if (mydate.getDate() < 10) {
-  //     str += "0" + mydate.getDate();
-  //   } else {
-  //     str += mydate.getDate();
-  //   }
-  //   str += month[mydate.getMonth()];
-  //   str += mydate.getFullYear();
-  //   return str;
-  // }
+  const getQty = (shareid) => {
+    const Qty = trecords.reduce((total, record) => 
+    (record.shareid === shareid && record.qty < 0) ? total + record.qty : total, 0);
+    return -1*Qty;
+  };
 
-  const getTotalSale = () => {
-    const totalCost = records.reduce((total, record) => total + record.salevalue, 0);
-      return totalCost;
+  const getAvgSale = (shareid) => {
+    const totalSaleValue = trecords.reduce((total, record) => 
+    (record.shareid === shareid && record.qty < 0) ? total + parseFloat(record.amount) : total, 0);
+    const totalSaleQty = trecords.reduce((total, record) => 
+    (record.shareid === shareid && record.qty < 0) ? total + record.qty : total, 0);
+      return totalSaleValue/totalSaleQty;
+  };
+
+  const getAvgPurchase = (shareid) => {
+    const totalPurchaseValue = trecords.reduce((total, record) => 
+    (record.shareid === shareid && record.qty > 0) ? total + parseFloat(record.amount) : total, 0);
+    const totalPurchaseQty = trecords.reduce((total, record) => 
+    (record.shareid === shareid && record.qty > 0) ? total + record.qty : total, 0);
+      return totalPurchaseValue/totalPurchaseQty;
+  };
+
+  const getTotalSale = (shareid) => {
+    const totalSaleValue = trecords.reduce((total, record) => 
+    (record.shareid === shareid && record.qty < 0) ? total + parseFloat(record.amount) : total, 0);
+      return -1*totalSaleValue;
+  };
+
+  const getTotalSaleAll = (shareid) => {
+    const totalSaleValue = trecords.reduce((total, record) => 
+    record.qty < 0 ? total + parseFloat(record.amount) : total, 0);
+      return -1*totalSaleValue;
   };
 
   const getTotalGain = () => {
-    const totalCost = records.reduce((total, record) => total + record.gain, 0);
-      return totalCost;
+    const totalGain = grecords.reduce((total, record) => total + parseFloat(record.amount), 0);
+      return -1*totalGain;
   };
 
   return (
@@ -70,20 +87,20 @@ export default function ReportRealGain() {
           <th style={{ textAlign: 'right' }}>Total Sale Value</th>
           <th style={{ textAlign: 'right' }}>Realized Gain</th>
         </tr>
-        {records.map((record) => (
+        {grecords.map((record) => (
           <tr>
             <td>{record.company}</td>
-            <td style={{ textAlign: 'right' }}>{record.qty}</td>
-            <td style={{ textAlign: 'right' }}>{record.salerate.toFixed(2)}</td>
-            <td style={{ textAlign: 'right' }}>{record.purrate.toFixed(2)}</td>
-            <td style={{ textAlign: 'right' }}>{record.salevalue.toFixed(2)}</td>
-            <td style={record.gain < 0 ? redstyle : greenstyle}><b>{record.gain.toFixed(2)}</b></td>
+            <td style={{ textAlign: 'right' }}>{getQty(record.shareid).toLocaleString('en-IN', {minimumFractionDigits:0, maximumFractionDigits:0 })}</td>
+            <td style={{ textAlign: 'right' }}>{(getAvgSale(record.shareid)).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2 })}</td>
+            <td style={{ textAlign: 'right' }}>{(getAvgPurchase(record.shareid)).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2 })}</td>
+            <td style={{ textAlign: 'right' }}>{(getTotalSale(record.shareid)).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2 })}</td>
+            <td style={parseFloat(record.amount) >= 0 ? redstyle : greenstyle}><b>{(-1*parseFloat(record.amount)).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2 })}</b></td>
           </tr>
         ))}
         <tr>
           <td colspan='4' style={{ textAlign: 'right' }}>Totals</td>
-          <th style={{ textAlign: 'right' }}>{getTotalSale().toFixed(2)}</th>
-          <th style={getTotalGain() < 0 ? redstyle : greenstyle}>{getTotalGain().toFixed(2)}</th>
+          <th style={{ textAlign: 'right' }}>{getTotalSaleAll().toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2 })}</th>
+          <th style={getTotalGain() < 0 ? redstyle : greenstyle}>{getTotalGain().toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2 })}</th>
         </tr>
       </table>
     </div>

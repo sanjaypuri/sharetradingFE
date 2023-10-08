@@ -32,6 +32,7 @@ export default function Buy() {
 
   const handlePurchase = (event) => {
     event.preventDefault();
+    alert("Hello")
     if (!validPurchase()) {
       return;
     }
@@ -99,7 +100,7 @@ export default function Buy() {
       <div className="w3-third w3-pale-blue">
         <div id="Buy" className="w3-container tab w3-card">
           <h2>Purchase Details</h2>
-          <form className="w3-container w3-pale-blue" onSubmit={handlePurchase}>
+          <form className="w3-container w3-pale-blue">
             <div>
               <label className="w3-text-indigo"><b>Select Share<span className="w3-text-red"> *</span></b></label>
               <Select
@@ -120,7 +121,7 @@ export default function Buy() {
               <label className="w3-text-indigo w3-margin-top"><b>Purchase Qty<span className="w3-text-red"> *</span></b></label>
               <input className="w3-input w3-border" type="text" onChange={e => setPurQty(e.target.value)} />
             </div>
-            <button type="submit" className="w3-btn w3-blue w3-margin-top w3-margin-bottom" style={{ width: '100%' }}>Save</button>
+            <button type="button" className="w3-btn w3-blue w3-margin-top w3-margin-bottom" style={{ width: '100%' }} onClick={handlePurchase}>Save</button>
           </form>
         </div>
       </div>

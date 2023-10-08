@@ -32,6 +32,7 @@ export default function ReportAllBuy() {
         };
       })
       .catch(err => {
+        console.log(err);
         if (err.message === "Request aborted") {
           ;
         } else {
@@ -243,8 +244,8 @@ export default function ReportAllBuy() {
                 <td>{record.company}</td>
                 <td>{toDateString(record.tdate)}</td>
                 <td style={{ textAlign: 'right' }}>{record.qty}</td>
-                <td style={{ textAlign: 'right' }}>{parseFloat(record.rate).toFixed(2)}</td>
-                <td style={{ textAlign: 'right' }}>{parseFloat(record.amount).toFixed(2)}</td>
+                <td style={{ textAlign: 'right' }}>{parseFloat(record.rate).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2 })}</td>
+                <td style={{ textAlign: 'right' }}>{parseFloat(record.amount).toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2 })}</td>
               </>
               ) : (
                 <>
@@ -254,7 +255,7 @@ export default function ReportAllBuy() {
         ))}
         <tr>
           <td colspan='4' style={{ textAlign: 'right' }}>Total Purchase Value</td>
-          <th style={{ textAlign: 'right' }}>{getTotal().toFixed(2)}</th>
+          <th style={{ textAlign: 'right' }}>{getTotal().toLocaleString('en-IN', {minimumFractionDigits:2, maximumFractionDigits:2 })}</th>
         </tr>
       </table>
       <div id="id01" className="w3-modal">
