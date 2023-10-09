@@ -17,7 +17,6 @@ export default function Login() {
     }
     axios.post("http://localhost:5000/api/login", {username, password})
       .then(res => {
-        console.log(res.data.success);
         if(res.data.success){
           sessionStorage.setItem("spbysptoken", res.data.data.token);
           sessionStorage.setItem("spbyspuser", res.data.data.user);

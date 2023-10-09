@@ -63,7 +63,7 @@ export default function About() {
       const updatedState = x.map((item, index) => ({
         ...item,
         closingValue: closingValues[index],
-        currentValue: closingValues[index] * item.qty,
+        currentValue: closingValues[index] * parseInt(item.qty),
       }));
       setPortfolioTableData(updatedState);
       setLoading(false);
