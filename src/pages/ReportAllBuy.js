@@ -143,7 +143,6 @@ export default function ReportAllBuy() {
       return false;
     };
     const minQty = getMinQty(shareid);
-    alert("min:" + minQty)
     if (parseInt(purchaseqty) < minQty) {
       toast.error("Qty bought cannot be less qty sold")
       return false;

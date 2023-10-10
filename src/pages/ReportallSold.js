@@ -79,7 +79,11 @@ export default function ReportAllSold() {
         total += parseFloat(transactions[i].amount);
       }
     };
-    return -1 * total;
+    if (total ===0 ){
+      return 0;
+    } else {
+      return -1 * total;
+    }
   };
 
   const handleModal = (record) => {
@@ -130,7 +134,7 @@ export default function ReportAllSold() {
       return false;
     };
     if (parseFloat(salerate) === 0) {
-      toast.alert("Sale rate cannot be 0");
+      toast.error("Sale rate cannot be 0");
       return;
     }
     if (!parseFloat(salerate)) {
@@ -142,7 +146,7 @@ export default function ReportAllSold() {
       return false;
     };
     if (parseInt(saleqty) === 0) {
-      toast.alert("Sale qty cannot be 0");
+      toast.error("Sale qty cannot be 0");
       return;
     }
     if (!parseInt(saleqty)) {

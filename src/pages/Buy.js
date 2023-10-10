@@ -32,7 +32,6 @@ export default function Buy() {
 
   const handlePurchase = (event) => {
     event.preventDefault();
-    alert("Hello")
     if (!validPurchase()) {
       return;
     }
